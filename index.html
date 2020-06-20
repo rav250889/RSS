@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+	<head>
+		<meta name="robots" content="index, follow">
+		<meta charset="UTF-8">
+		<meta name="author" content="Rafał Wałach">
+		<title>Project</title>
+        <script src="jquery/jquery-3.4.1.min.js"></script>
+        <style>
+            *{margin: 0;padding: 0;}
+            #container{margin: 20px auto;width: 500px;height: 550px;border: 2px solid black;}
+            #formularz{position: relative;}
+            h3{text-align: center;font-size: 30px;margin: 10px 0;}
+            .url{width: 300px;display: block;margin: 25px auto;}
+            .url{height: 30px;}
+            #list{width: 500px;height: 200px; border-bottom:1px solid grey;border-top:1px solid black;font-size: 12px;margin-bottom: 80px; overflow: auto;}
+            #list::-web-scrollbar{width: 10px;}
+            #send{position: absolute;right: 10px;}
+            #view{position: absolute;left: 10px;}
+            #save{margin-left: 190px;margin-bottom: 10px;}
+            #del{cursor: pointer; position: absolute; left: 140px;padding: 4px 30px;color: red;background-color: grey;border: none;border-radius: 5px;}
+            #save, #send, #view{padding: 4px 30px;color: greenyellow;background-color: grey;border: none;border-radius: 5px;cursor: pointer;}
+            #save:active, #del:active, #send:active, #view:active{transform: translateY(4px);}
+            #error{position: absolute; top: 420px; font-size: 13px; font-weight: bold; color: red;}
+        </style>
+	</head>
+	<body>
+        <div id="container">
+            <form id="formularz">
+                <h3>RSS</h3>
+                <input id="rss" class="url" type="text" placeholder=" enter some RSS address">
+                <label class="error"></label>
+                <input class="url" type="email" id="email" placeholder=" enter your email address">
+                <input type="button" id="save" value="Save">
+                <div id="list"></div>
+                <label id="error"></label>
+                <input type="button" id="view" value="Show RSS">
+                <input type="button" id="del" name="del" value="Delete">
+                <input type="button" id="send" value="Send">
+            </form>
+        </div>
+        <script>
+            var list = document.getElementById("list");
+            $("document").ready(function(){
+                
+                $("#save").click(function(){
+                    if($("#rss").val() == "" || $("#email").val() == "")
+                        {
+                            $("#error").text("*Enter RSS and email address");
+                        }
+                    else
+                        {
+                            $.post("saveToDb.php", 
+                                {
+                                    "rss": $("#rss").val(),
+                                    "email": $("#email").val()
+                                }
+                            );
+                            $("#error").text('Email and RSS was save in database. If You want to see RSS click "Show RSS" button. If You want to send email You must click "Show RSS" button and then click "Send"');
+                            
+                        }
+                });
+                
+                 $("#view").click(function(){
+                    $.post("readToDiv.php", function(data){
+                        if(data != "")
+                            {
+                                document.getElementById("list").innerHTML = data;
+                                $("#error").text("");
+                            }
+                        else
+                            $("#error").text("*Database is empty");
+                    })
+                });
+                
+                $("#del").click(function(){
+                    $.post("deleteFromDb.php", function(data){
+                        if(list.innerHTML != "")
+                            {
+                                list.innerHTML = "";
+                                $("#error").text(data);
+                            }
+                        else
+                            $("#error").text(data);
+                    });
+                });
+                
+                $("#send").click(function(){
+                    if($("#rss").val() == "" && $("#email").val() == "" && list.innerHTML == "")
+                        {
+                            $("#error").text('*Can`t send email. Probably database is empty. Click "Show RSS" button and check. The list must be displayed. If you get a message "*Database is empty" You must enter RSS and email address and click "Save" button');
+                        }
+                    else if(list.innerHTML == "")
+                        $("#error").text('Click "Show RSS" button and check. The list must be displayed. If you get a message "*Database is empty" You must click "Save" button');
+                    else
+                        {
+                            $.post("sendEmail.php");
+                            $("#error").text("Success. The email was send");
+                        }
+                });
+            });
+        </script>
+	</body>
+</html>
