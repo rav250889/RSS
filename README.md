@@ -1,6 +1,6 @@
 <html>
 <body>
-  <h1>RSS Apliccation</h1>
+  <h1>RSS Application</h1>
   <p><b>Create database in MySQL</b></p>
   <p>create database "any name";</p><br>
   <p><b>Create table rss with columns "id, user, fees, title, link" in your database</b></p>
